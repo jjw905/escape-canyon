@@ -29,7 +29,7 @@
 | 파일 | 역할 |
 | --- | --- |
 | [default-prompt.txt](default-prompt.txt) | 브라우저에서 실행되는 게임의 **기본 지시문**입니다. 이 문장 뒤에 자신의 아이디어를 이어서 적습니다. |
-| [prompt-setting.txt](prompt-setting.txt) | **게임 설명**입니다. 화면은 가로 480, 세로 800입니다. 점프 높이, 중력, 맵, 동물, 아이템, 소리가 이 파일에 있습니다. 동물마다 **인식 범위**가 따로 적혀 있습니다. |
+| [prompt-setting.txt](prompt-setting.txt) | **게임 설명**입니다. 화면은 가로 480, 세로 800입니다. 점프 높이, 중력, 맵, 동물, 아이템, 소리가 이 파일에 있습니다. 동물마다 **인식 범위**가 있습니다. 점프 높이는 화면의 2.5%, 10%, 21%이고, 공중에서도 좌우로 방향을 바꿉니다. 클리어·일시정지·게임오버 그림의 자리 비율도 적혀 있습니다. |
 | [map.js](map.js) | **맵 배치**입니다. 화면 10장의 발판, 바람, 동물, 아이템 좌표입니다. 좌표는 게임 화면 **480 × 800** 기준입니다. |
 
 두 글은 보드에 적어 둔 문장을 그대로 옮긴 것입니다. 다듬거나 요약하지 않았습니다.
@@ -54,14 +54,14 @@
 | --- | --- | --- |
 | 01 | 없음 | 큰뿔양 |
 | 02 | 없음 | 콘도르 |
-| 03 | 없음 | 없음 |
+| 03 | 없음 | 큰뿔양 |
 | 04 | 있음 | 콘도르, 바위다람쥐 |
-| 05 | 없음 | 없음 |
-| 06 | 있음 | 없음 |
+| 05 | 없음 | 바위다람쥐 |
+| 06 | 있음 | 회색늑대 |
 | 07 | 없음 | 회색늑대 |
-| 08 | 있음 | 없음 |
+| 08 | 있음 | 큰뿔양 |
 | 09 | 없음 | 콘도르 |
-| 10 | 없음 | 없음 |
+| 10 | 없음 | 회색늑대 |
 
 ### 플레이어
 
@@ -161,6 +161,21 @@
 ### 바람
 
 [wind_arrow_cut.png](assets/wind/wind_arrow_cut.png) 는 바람이 부는 방향의 화살입니다. **576 × 168**픽셀입니다.
+
+### 화면
+
+시작, 일시정지, 클리어, 게임오버 그림입니다. [assets/ui](assets/ui)에 있습니다.
+
+| 파일 | 내용 |
+| --- | --- |
+| [game_start_background.png](assets/ui/game_start_background.png) | 시작 화면 배경 |
+| [game_start_logo.png](assets/ui/game_start_logo.png) | 로고와 시작, 도움말 버튼 |
+| [game_main_screen.png](assets/ui/game_main_screen.png) | 게임 제목 화면 |
+| [pause.png](assets/ui/pause.png) | 일시정지 그림 |
+| [pause_screen.png](assets/ui/pause_screen.png) | 일시정지 화면 |
+| [clear_screen.png](assets/ui/clear_screen.png) | 클리어 화면 |
+| [game_over_banner.png](assets/ui/game_over_banner.png) | 게임오버 글자 |
+| [game_over_screen.png](assets/ui/game_over_screen.png) | 게임오버 화면 |
 
 ## 파일 이름
 
