@@ -15,4 +15,9 @@ assets/gray_wolf
 assets/item
 assets/platform
 assets/wind
+assets/map
 ```
+
+맵은 `assets/map/01.png`부터 `10.png`다. 10이 맨 위 화면이다.
+
+아이템 픽셀 크기는 신발 50×52, 방패 39×50, 우산 50×54다.
