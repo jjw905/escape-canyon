@@ -345,12 +345,14 @@ function updateSheep(mob, dt, box) {
     const reach = mob.w * 0.5 + 8;
     const minX = (mob.left ?? mob.x) - reach;
     const maxX = (mob.right ?? mob.x) + reach;
-    if (hit(box, mob) && hurt()) {
-      const sign = mob.facing < 0 ? -1 : 1;
-      game.player.knock = sign * mob.w;
-      game.player.vx = sign * RUN;
-      game.player.vy = 260;
-      game.player.grounded = false;
+    if (hit(box, mob)) {
+      if (hurt()) {
+        const sign = mob.facing < 0 ? -1 : 1;
+        game.player.knock = sign * mob.w;
+        game.player.vx = sign * RUN;
+        game.player.vy = 260;
+        game.player.grounded = false;
+      }
       mob.phase = "fade";
       mob.fade = 1;
     } else if (mob.timer <= 0 || mob.x < minX || mob.x > maxX) {
@@ -375,9 +377,11 @@ function updateSquirrel(mob, dt, box) {
     if (mob.x > mob.right) { mob.x = mob.right; mob.dir = -1; }
   }
   facePlayer(mob);
-  if (nearMob(mob, box, 2) && game.cover <= 0 && game.coverFade <= 0 && (mob.cooldown ?? 0) <= 0 && hurt()) {
-    game.cover = 5;
-    game.coverAge = 0;
+  if (nearMob(mob, box, 2) && game.cover <= 0 && game.coverFade <= 0 && (mob.cooldown ?? 0) <= 0) {
+    if (hurt()) {
+      game.cover = 5;
+      game.coverAge = 0;
+    }
     mob.cooldown = 6.5;
   }
 }
