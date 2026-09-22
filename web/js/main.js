@@ -110,7 +110,7 @@ function windAt() {
   const box = body();
   for (const w of screenData().winds) {
     if (box.x + box.w < w.x || box.x > w.x + w.w || box.y + box.h < w.y || box.y > w.y + w.h) continue;
-    const inset = w.h * 0.2;
+    const inset = w.h * 0.3;
     const cy = box.y + box.h / 2;
     const fromEdge = Math.min(cy - w.y, w.y + w.h - cy);
     const bodyInside = box.y >= w.y + inset && box.y + box.h <= w.y + w.h - inset;
@@ -168,7 +168,6 @@ function moveX(dx) {
     for (const solid of solids()) {
       if (!hit(body(), solid)) continue;
       p.x = step > 0 ? solid.x - BODY_W : solid.x + solid.w;
-      p.vx = 0;
       stopped = true;
       break;
     }
@@ -229,6 +228,8 @@ function ensureMobs() {
     timer: 0,
     frame: 0,
     petted: false,
+    cooldown: 0,
+    fade: 1,
     homeX: m.homeX ?? m.x,
     homeY: m.homeY ?? m.y,
   }));
@@ -246,7 +247,33 @@ function hurt() {
   return true;
 }
 
+function ensureFlyCondor() {
+  if (game.noJump < 10 || !game.player) return;
+  const mobs = ensureMobs();
+  if (mobs.some((m) => m.kind === "condor" && m.phase !== "gone")) return;
+  const x = Math.max(0, Math.min(VW - 72, game.player.x));
+  mobs.push({
+    kind: "condor",
+    id: screenData().id + "-condor-fly",
+    x,
+    y: -54,
+    w: 72,
+    h: 54,
+    phase: "swoop",
+    timer: 4,
+    frame: 0,
+    cooldown: 0,
+    fade: 1,
+    facing: 1,
+    homeX: x,
+    homeY: 24,
+    flyin: true,
+  });
+  game.noJump = 0;
+}
+
 function updateMobs(dt) {
+  ensureFlyCondor();
   const p = game.player;
   const box = body();
   for (const mob of ensureMobs()) {
@@ -298,9 +325,9 @@ function updateSheep(mob, dt, box) {
     if (mob.fade <= 0) mob.phase = "gone";
     return;
   }
-  if (mob.cooldown > 0) mob.cooldown -= dt;
+  if ((mob.cooldown ?? 0) > 0) mob.cooldown -= dt;
   if (!mob.dir) mob.dir = 1;
-  facePlayer(mob);
+  if (mob.phase === "patrol" || mob.phase === "prep") facePlayer(mob);
   const near = nearMob(mob, box, 0.5);
   if (mob.phase === "patrol") {
     if (onFoot(mob)) {
@@ -308,22 +335,27 @@ function updateSheep(mob, dt, box) {
       if (mob.x < mob.left) { mob.x = mob.left; mob.dir = 1; }
       if (mob.x > mob.right) { mob.x = mob.right; mob.dir = -1; }
     }
-    if (near && mob.cooldown <= 0) { mob.phase = "prep"; mob.timer = 0.25; }
+    if (near && (mob.cooldown ?? 0) <= 0) { mob.phase = "prep"; mob.timer = 0.25; }
   } else if (mob.phase === "prep") {
     mob.timer -= dt;
     if (mob.timer <= 0) { mob.phase = "ram"; mob.timer = 0.45; }
   } else if (mob.phase === "ram") {
     mob.x += 220 * dt * mob.facing;
     mob.timer -= dt;
-    if (hit(box, mob) && hurt()) {
-      const sign = mob.facing < 0 ? -1 : 1;
-      game.player.knock = sign * mob.w;
-      game.player.vx = sign * RUN;
-      game.player.vy = 260;
-      game.player.grounded = false;
+    const reach = mob.w * 0.5 + 8;
+    const minX = (mob.left ?? mob.x) - reach;
+    const maxX = (mob.right ?? mob.x) + reach;
+    if (hit(box, mob)) {
+      if (hurt()) {
+        const sign = mob.facing < 0 ? -1 : 1;
+        game.player.knock = sign * mob.w;
+        game.player.vx = sign * RUN;
+        game.player.vy = 260;
+        game.player.grounded = false;
+      }
       mob.phase = "fade";
       mob.fade = 1;
-    } else if (mob.timer <= 0 || mob.x < mob.left - 8 || mob.x > mob.right + 8) {
+    } else if (mob.timer <= 0 || mob.x < minX || mob.x > maxX) {
       mob.phase = "recover";
       mob.timer = 0.35;
     }
@@ -337,7 +369,7 @@ function updateSheep(mob, dt, box) {
 }
 
 function updateSquirrel(mob, dt, box) {
-  if (mob.cooldown > 0) mob.cooldown -= dt;
+  if ((mob.cooldown ?? 0) > 0) mob.cooldown -= dt;
   if (!mob.dir) mob.dir = 1;
   if (onFoot(mob)) {
     mob.x += 36 * dt * mob.dir;
@@ -345,9 +377,11 @@ function updateSquirrel(mob, dt, box) {
     if (mob.x > mob.right) { mob.x = mob.right; mob.dir = -1; }
   }
   facePlayer(mob);
-  if (nearMob(mob, box, 2) && game.cover <= 0 && game.coverFade <= 0 && mob.cooldown <= 0 && hurt()) {
-    game.cover = 5;
-    game.coverAge = 0;
+  if (nearMob(mob, box, 2) && game.cover <= 0 && game.coverFade <= 0 && (mob.cooldown ?? 0) <= 0) {
+    if (hurt()) {
+      game.cover = 5;
+      game.coverAge = 0;
+    }
     mob.cooldown = 6.5;
   }
 }
@@ -396,7 +430,7 @@ function updateCondor(mob, dt, box) {
     game.noJump = 0;
   } else if (mob.phase === "takeoff") {
     mob.timer -= dt;
-    if (mob.timer <= 0) { mob.phase = "swoop"; mob.timer = 1.2; }
+    if (mob.timer <= 0) { mob.phase = "swoop"; mob.timer = 4; }
   } else if (mob.phase === "swoop") {
     const tx = game.player.x - mob.x;
     const ty = game.player.y - mob.y;
@@ -533,9 +567,6 @@ function step(dt) {
     p.vx = dir * RUN;
   } else if (p.grounded && !p.charging) {
     p.vx = 0;
-  } else if (!p.grounded && !p.charging && !p.airCharging) {
-    if (Input.down.left) { p.vx = -RUN; p.facing = -1; }
-    else if (Input.down.right) { p.vx = RUN; p.facing = 1; }
   }
 
   p.grounded = false;
@@ -549,7 +580,7 @@ function step(dt) {
     if (p.vy > cap) p.vy = cap;
     game.calls.push("gravity");
   }
-  if (!p.charging) game.noJump += dt;
+  game.noJump += dt;
   p.boot = Math.max(0, p.boot - dt);
   p.shield = Math.max(0, p.shield - dt);
   p.umbrella = Math.max(0, p.umbrella - dt);
@@ -589,6 +620,22 @@ function spriteFrame(mob) {
   if (mob.phase === "carry") return "assets/condor/carry.png";
   if (mob.phase === "return") return "assets/condor/return.png";
   return "assets/condor/idle.png";
+}
+
+function titleSlide(finalY, delay, now) {
+  const t = (now - game.readyAt) / 1000 - delay;
+  const travel = Math.max(0, VH - finalY);
+  if (t <= 0) return finalY + travel;
+  const k = Math.min(1, t / 0.5);
+  const e = 1 - (1 - k) * (1 - k);
+  return Math.round(finalY + (1 - e) * travel);
+}
+
+function blitPart(src, sx, sy, sw, sh, x, y, w, h) {
+  const el = img(src);
+  if (!el.complete || !el.naturalWidth) return;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(el, sx, sy, sw, sh, Math.round(x), Math.round(y), Math.round(w), Math.round(h));
 }
 
 function blit(src, x, y, w, h, flip) {
@@ -692,15 +739,32 @@ function drawTitle() {
   ctx.fillStyle = "#14080c";
   ctx.fillRect(0, 0, VW, VH);
   const el = img("assets/ui/title.png");
+  const srcW = el.naturalWidth || 1024;
+  const srcH = el.naturalHeight || 1024;
   const dw = VW;
-  const dh = el.naturalWidth ? Math.round(dw * (el.naturalHeight / el.naturalWidth)) : dw;
+  const dh = Math.round(dw * (srcH / srcW));
   const dy = Math.round((VH - dh) / 2);
-  blit("assets/ui/title.png", 0, dy, dw, dh, false);
-  const scale = dw / (el.naturalWidth || 1024);
-  game.titleHit = {
-    start: posterBox(320, 650, 470, 100, scale, dy),
-    help: posterBox(320, 755, 470, 110, scale, dy),
-  };
+  const scale = dw / srcW;
+  const now = performance.now();
+  const bands = [
+    { sy: 0, sh: 650, delay: 0 },
+    { sy: 650, sh: 100, delay: 1, hit: "start" },
+    { sy: 755, sh: srcH - 755, delay: 2, hit: "help", hitH: 110 },
+  ];
+  game.titleHit = {};
+  for (const band of bands) {
+    const finalY = dy + band.sy * scale;
+    const y = titleSlide(finalY, band.delay, now);
+    const h = band.sh * scale;
+    blitPart("assets/ui/title.png", 0, band.sy, srcW, band.sh, 0, y, dw, h);
+    if (!band.hit) continue;
+    game.titleHit[band.hit] = {
+      x: 320 * scale,
+      y,
+      w: 470 * scale,
+      h: (band.hitH || band.sh) * scale,
+    };
+  }
 }
 
 function drawMenu(word, buttons) {
