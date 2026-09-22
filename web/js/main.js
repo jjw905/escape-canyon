@@ -110,7 +110,7 @@ function windAt() {
   const box = body();
   for (const w of screenData().winds) {
     if (box.x + box.w < w.x || box.x > w.x + w.w || box.y + box.h < w.y || box.y > w.y + w.h) continue;
-    const inset = w.h * 0.2;
+    const inset = w.h * 0.3;
     const cy = box.y + box.h / 2;
     const fromEdge = Math.min(cy - w.y, w.y + w.h - cy);
     const bodyInside = box.y >= w.y + inset && box.y + box.h <= w.y + w.h - inset;
@@ -247,7 +247,33 @@ function hurt() {
   return true;
 }
 
+function ensureFlyCondor() {
+  if (game.noJump < 10 || !game.player) return;
+  const mobs = ensureMobs();
+  if (mobs.some((m) => m.kind === "condor" && m.phase !== "gone")) return;
+  const x = Math.max(0, Math.min(VW - 72, game.player.x));
+  mobs.push({
+    kind: "condor",
+    id: screenData().id + "-condor-fly",
+    x,
+    y: -54,
+    w: 72,
+    h: 54,
+    phase: "swoop",
+    timer: 4,
+    frame: 0,
+    cooldown: 0,
+    fade: 1,
+    facing: 1,
+    homeX: x,
+    homeY: 24,
+    flyin: true,
+  });
+  game.noJump = 0;
+}
+
 function updateMobs(dt) {
+  ensureFlyCondor();
   const p = game.player;
   const box = body();
   for (const mob of ensureMobs()) {
