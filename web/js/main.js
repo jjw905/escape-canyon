@@ -456,9 +456,16 @@ function updateCondor(mob, dt, box) {
   }
 }
 
+const SUMMIT_FLAG = 234;
+
 function crossScreen() {
   const p = game.player;
   if (p.carried) return;
+  if (game.screen === MAP.screens.length - 1 && p.y + BODY_H <= SUMMIT_FLAG) {
+    game.state = "Clear";
+    game.calls.push("clear");
+    return;
+  }
   if (p.y + BODY_H <= 0) {
     if (game.screen === MAP.screens.length - 1) {
       game.state = "Clear";

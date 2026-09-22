@@ -94,11 +94,11 @@ const MAP = {
         },
         {
           "x": 408,
-          "y": 355,
+          "y": 368.5,
           "w": 72,
-          "h": 64,
-          "sprite": "assets/plat/24.png",
-          "type": "24"
+          "h": 37,
+          "sprite": "assets/plat/21.png",
+          "type": "21"
         },
         {
           "x": 266,
@@ -212,19 +212,19 @@ const MAP = {
         },
         {
           "x": 0,
-          "y": 114,
+          "y": 127.5,
           "w": 72,
-          "h": 64,
-          "sprite": "assets/plat/24.png",
-          "type": "24"
+          "h": 37,
+          "sprite": "assets/plat/21.png",
+          "type": "21"
         },
         {
           "x": 408,
-          "y": 752,
+          "y": 765.5,
           "w": 72,
-          "h": 64,
-          "sprite": "assets/plat/24.png",
-          "type": "24"
+          "h": 37,
+          "sprite": "assets/plat/21.png",
+          "type": "21"
         },
         {
           "x": 266,
@@ -693,11 +693,11 @@ const MAP = {
         },
         {
           "x": 408,
-          "y": 752,
+          "y": 765.5,
           "w": 72,
-          "h": 64,
-          "sprite": "assets/plat/24.png",
-          "type": "24"
+          "h": 37,
+          "sprite": "assets/plat/21.png",
+          "type": "21"
         },
         {
           "x": 266,
@@ -1079,11 +1079,11 @@ const MAP = {
         },
         {
           "x": 408,
-          "y": 752,
+          "y": 765.5,
           "w": 72,
-          "h": 64,
-          "sprite": "assets/plat/24.png",
-          "type": "24"
+          "h": 37,
+          "sprite": "assets/plat/21.png",
+          "type": "21"
         },
         {
           "x": 266,
@@ -1328,14 +1328,6 @@ const MAP = {
           "type": "04"
         },
         {
-          "x": 0,
-          "y": 123,
-          "w": 72,
-          "h": 46,
-          "sprite": "assets/plat/11.png",
-          "type": "11"
-        },
-        {
           "x": 408,
           "y": 755,
           "w": 72,
@@ -1366,14 +1358,6 @@ const MAP = {
           "h": 66,
           "sprite": "assets/plat/07.png",
           "type": "07"
-        },
-        {
-          "x": 408,
-          "y": 104,
-          "w": 72,
-          "h": 84,
-          "sprite": "assets/plat/18.png",
-          "type": "18"
         }
       ],
       "winds": [],
@@ -1403,7 +1387,7 @@ const MAP = {
           "id": "10-1",
           "type": "shield",
           "x": 25,
-          "y": 120,
+          "y": 440,
           "w": 22,
           "h": 26
         },
