@@ -618,6 +618,22 @@ function spriteFrame(mob) {
   return "assets/condor/idle.png";
 }
 
+function titleSlide(finalY, delay, now) {
+  const t = (now - game.readyAt) / 1000 - delay;
+  const travel = Math.max(0, VH - finalY);
+  if (t <= 0) return finalY + travel;
+  const k = Math.min(1, t / 0.5);
+  const e = 1 - (1 - k) * (1 - k);
+  return Math.round(finalY + (1 - e) * travel);
+}
+
+function blitPart(src, sx, sy, sw, sh, x, y, w, h) {
+  const el = img(src);
+  if (!el.complete || !el.naturalWidth) return;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(el, sx, sy, sw, sh, Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+}
+
 function blit(src, x, y, w, h, flip) {
   const el = img(src);
   if (!el.complete || !el.naturalWidth) return;
@@ -719,15 +735,32 @@ function drawTitle() {
   ctx.fillStyle = "#14080c";
   ctx.fillRect(0, 0, VW, VH);
   const el = img("assets/ui/title.png");
+  const srcW = el.naturalWidth || 1024;
+  const srcH = el.naturalHeight || 1024;
   const dw = VW;
-  const dh = el.naturalWidth ? Math.round(dw * (el.naturalHeight / el.naturalWidth)) : dw;
+  const dh = Math.round(dw * (srcH / srcW));
   const dy = Math.round((VH - dh) / 2);
-  blit("assets/ui/title.png", 0, dy, dw, dh, false);
-  const scale = dw / (el.naturalWidth || 1024);
-  game.titleHit = {
-    start: posterBox(320, 650, 470, 100, scale, dy),
-    help: posterBox(320, 755, 470, 110, scale, dy),
-  };
+  const scale = dw / srcW;
+  const now = performance.now();
+  const bands = [
+    { sy: 0, sh: 650, delay: 0 },
+    { sy: 650, sh: 100, delay: 1, hit: "start" },
+    { sy: 755, sh: srcH - 755, delay: 2, hit: "help", hitH: 110 },
+  ];
+  game.titleHit = {};
+  for (const band of bands) {
+    const finalY = dy + band.sy * scale;
+    const y = titleSlide(finalY, band.delay, now);
+    const h = band.sh * scale;
+    blitPart("assets/ui/title.png", 0, band.sy, srcW, band.sh, 0, y, dw, h);
+    if (!band.hit) continue;
+    game.titleHit[band.hit] = {
+      x: 320 * scale,
+      y,
+      w: 470 * scale,
+      h: (band.hitH || band.sh) * scale,
+    };
+  }
 }
 
 function drawMenu(word, buttons) {
