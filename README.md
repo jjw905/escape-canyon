@@ -1,12 +1,12 @@
 # Escape Canyon
 
-플레이 파일은 `index.html`이다. GitHub는 폴더를 파일보다 위에 두므로, 목록에서는 `assets`와 `web` 바로 아래 첫 파일로 보인다. 이 파일을 더블클릭하면 서버 없이 열린다. 그림과 소리는 `web/`에 있으므로, `index.html`만 따로 옮기면 화면이 빈다. `web/index.html`도 같은 게임이다.
+플레이 파일은 `index.html`이다. GitHub는 폴더를 파일보다 위에 두고 `README.md`를 파일 중 맨 위에 고정하므로, 목록은 `assets`, `text`, `web`, `README.md`, 그 다음이 `index.html`이다. 이 파일을 더블클릭하면 서버 없이 열린다. 그림과 소리는 `web/`에 있으므로, `index.html`만 따로 옮기면 화면이 빈다. `web/index.html`도 같은 게임이다.
 
 ## 에셋이 두 벌이다
 
 FigJam의 In Github 섹션에 올려 둔 원본은 저장소 루트 `assets/`다. 파일 이름이 보드와 같다. 플레이어, 양, 콘도르, 다람쥐, 늑대, 아이템, 바람, 소리, 발판 01–23과 29–32가 여기 있다.
 
-돌아가는 게임은 이 폴더를 읽지 않는다. `web/index.html`과 `web/js/map.js`는 `web/assets/`의 짧은 이름만 읽는다. 루트 `map.js`도 같은 짧은 경로(`assets/plat/21.png` 같은 식)라서, 저장소 루트에서는 그림이 없고 `web/` 기준으로만 맞는다.
+돌아가는 게임은 이 폴더를 읽지 않는다. `web/index.html`과 `web/js/map.js`는 `web/assets/`의 짧은 이름만 읽는다. `text/map.js`도 같은 짧은 경로(`assets/plat/21.png` 같은 식)라서, 저장소 루트에서는 그림이 없고 `web/` 기준으로만 맞는다.
 
 같은 그림의 이름만 다른 것:
 
@@ -53,7 +53,7 @@ In Github 발판 줄은 01–23, 29–32다. 24–28번은 그 줄에 없다.
 
 ## 보드에서 비어 있는 칸
 
-In Github 섹션 안은 채택 후보 에셋, Prompt Setting, 배치 열이다. 그 안의 Default Prompt 칸은 비어 있다. 규칙 문장은 Prompt Setting과 저장소의 `prompt-setting.txt`, `default-prompt.txt`에 있다.
+In Github 섹션 안은 채택 후보 에셋, Prompt Setting, 배치 열이다. 그 안의 Default Prompt 칸은 비어 있다. 규칙 문장은 Prompt Setting과 저장소의 `text/prompt-setting.txt`, `text/default-prompt.txt`에 있다.
 
 배치 열에 없는 칸이 있다. 6번 배경, 6번 몹, 5번 환경. 게임 배경 파일 `web/assets/bg/06.png`는 저장소에 있다. 배치 열만 다시 베끼면 6번 그림이 빠진다.
 
@@ -61,9 +61,10 @@ In Github 섹션 안은 채택 후보 에셋, Prompt Setting, 배치 열이다. 
 escape-canyon
 ├── index.html
 ├── README.md
-├── default-prompt.txt
-├── map.js
-├── prompt-setting.txt
+├── text
+│   ├── default-prompt.txt
+│   ├── map.js
+│   └── prompt-setting.txt
 ├── assets
 │   ├── bighorn
 │   │   ├── bighorn_idle_makebead.png
