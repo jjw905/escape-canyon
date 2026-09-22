@@ -168,7 +168,6 @@ function moveX(dx) {
     for (const solid of solids()) {
       if (!hit(body(), solid)) continue;
       p.x = step > 0 ? solid.x - BODY_W : solid.x + solid.w;
-      p.vx = 0;
       stopped = true;
       break;
     }
@@ -229,6 +228,8 @@ function ensureMobs() {
     timer: 0,
     frame: 0,
     petted: false,
+    cooldown: 0,
+    fade: 1,
     homeX: m.homeX ?? m.x,
     homeY: m.homeY ?? m.y,
   }));
@@ -298,9 +299,9 @@ function updateSheep(mob, dt, box) {
     if (mob.fade <= 0) mob.phase = "gone";
     return;
   }
-  if (mob.cooldown > 0) mob.cooldown -= dt;
+  if ((mob.cooldown ?? 0) > 0) mob.cooldown -= dt;
   if (!mob.dir) mob.dir = 1;
-  facePlayer(mob);
+  if (mob.phase === "patrol" || mob.phase === "prep") facePlayer(mob);
   const near = nearMob(mob, box, 0.5);
   if (mob.phase === "patrol") {
     if (onFoot(mob)) {
@@ -308,13 +309,16 @@ function updateSheep(mob, dt, box) {
       if (mob.x < mob.left) { mob.x = mob.left; mob.dir = 1; }
       if (mob.x > mob.right) { mob.x = mob.right; mob.dir = -1; }
     }
-    if (near && mob.cooldown <= 0) { mob.phase = "prep"; mob.timer = 0.25; }
+    if (near && (mob.cooldown ?? 0) <= 0) { mob.phase = "prep"; mob.timer = 0.25; }
   } else if (mob.phase === "prep") {
     mob.timer -= dt;
     if (mob.timer <= 0) { mob.phase = "ram"; mob.timer = 0.45; }
   } else if (mob.phase === "ram") {
     mob.x += 220 * dt * mob.facing;
     mob.timer -= dt;
+    const reach = mob.w * 0.5 + 8;
+    const minX = (mob.left ?? mob.x) - reach;
+    const maxX = (mob.right ?? mob.x) + reach;
     if (hit(box, mob) && hurt()) {
       const sign = mob.facing < 0 ? -1 : 1;
       game.player.knock = sign * mob.w;
@@ -323,7 +327,7 @@ function updateSheep(mob, dt, box) {
       game.player.grounded = false;
       mob.phase = "fade";
       mob.fade = 1;
-    } else if (mob.timer <= 0 || mob.x < mob.left - 8 || mob.x > mob.right + 8) {
+    } else if (mob.timer <= 0 || mob.x < minX || mob.x > maxX) {
       mob.phase = "recover";
       mob.timer = 0.35;
     }
@@ -337,7 +341,7 @@ function updateSheep(mob, dt, box) {
 }
 
 function updateSquirrel(mob, dt, box) {
-  if (mob.cooldown > 0) mob.cooldown -= dt;
+  if ((mob.cooldown ?? 0) > 0) mob.cooldown -= dt;
   if (!mob.dir) mob.dir = 1;
   if (onFoot(mob)) {
     mob.x += 36 * dt * mob.dir;
@@ -345,7 +349,7 @@ function updateSquirrel(mob, dt, box) {
     if (mob.x > mob.right) { mob.x = mob.right; mob.dir = -1; }
   }
   facePlayer(mob);
-  if (nearMob(mob, box, 2) && game.cover <= 0 && game.coverFade <= 0 && mob.cooldown <= 0 && hurt()) {
+  if (nearMob(mob, box, 2) && game.cover <= 0 && game.coverFade <= 0 && (mob.cooldown ?? 0) <= 0 && hurt()) {
     game.cover = 5;
     game.coverAge = 0;
     mob.cooldown = 6.5;
@@ -396,7 +400,7 @@ function updateCondor(mob, dt, box) {
     game.noJump = 0;
   } else if (mob.phase === "takeoff") {
     mob.timer -= dt;
-    if (mob.timer <= 0) { mob.phase = "swoop"; mob.timer = 1.2; }
+    if (mob.timer <= 0) { mob.phase = "swoop"; mob.timer = 4; }
   } else if (mob.phase === "swoop") {
     const tx = game.player.x - mob.x;
     const ty = game.player.y - mob.y;
@@ -533,9 +537,6 @@ function step(dt) {
     p.vx = dir * RUN;
   } else if (p.grounded && !p.charging) {
     p.vx = 0;
-  } else if (!p.grounded && !p.charging && !p.airCharging) {
-    if (Input.down.left) { p.vx = -RUN; p.facing = -1; }
-    else if (Input.down.right) { p.vx = RUN; p.facing = 1; }
   }
 
   p.grounded = false;
@@ -549,7 +550,7 @@ function step(dt) {
     if (p.vy > cap) p.vy = cap;
     game.calls.push("gravity");
   }
-  if (!p.charging) game.noJump += dt;
+  game.noJump += dt;
   p.boot = Math.max(0, p.boot - dt);
   p.shield = Math.max(0, p.shield - dt);
   p.umbrella = Math.max(0, p.umbrella - dt);
