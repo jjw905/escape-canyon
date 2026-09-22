@@ -1,6 +1,6 @@
 # Escape Canyon
 
-플레이 파일은 `web/index.html`이다. 이 파일을 더블클릭하면 서버 없이 열린다. `index.html`만 따로 옮기면 그림과 소리가 빠진다. 게임은 `web/` 안의 파일만 읽는다.
+플레이 파일은 `index.html`이다. GitHub는 폴더를 파일보다 위에 두므로, 목록에서는 `assets`와 `web` 바로 아래 첫 파일로 보인다. 이 파일을 더블클릭하면 서버 없이 열린다. 그림과 소리는 `web/`에 있으므로, `index.html`만 따로 옮기면 화면이 빈다. `web/index.html`도 같은 게임이다.
 
 ## 에셋이 두 벌이다
 
@@ -59,6 +59,7 @@ In Github 섹션 안은 채택 후보 에셋, Prompt Setting, 배치 열이다. 
 
 ```
 escape-canyon
+├── index.html
 ├── README.md
 ├── default-prompt.txt
 ├── map.js
